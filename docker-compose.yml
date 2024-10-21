@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:13
+    container_name: postgres
+    environment:
+      POSTGRES_DB: mystore_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: helloworld
+    ports:
+      - "5432:5432"
+    networks:
+      - app
+
+  django:
+    build:
+      context: .
+    container_name: django-app
+    depends_on:
+      - postgres
+    environment:
+      DB_NAME: mystore_db
+      DB_USER: postgres
+      DB_PASSWORD: helloworld
+      DB_HOST: postgres
+      DB_PORT: 5432
+    ports:
+      - "8000:8000"
+    networks:
+      - app
+    command: >
+      sh -c "python manage.py migrate &&
+             python manage.py runserver 0.0.0.0:8000"
+
+networks:
+  app:
+    driver: bridge
+
